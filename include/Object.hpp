@@ -15,7 +15,7 @@ class Object
         vector<Face> faces;
         vector<Vertex> vertices;
         vector<string> split(const string& str, const string& delim);
-    protected:
+    public:
         Object();
         Object(string file);
         vector<Face> getFaces();

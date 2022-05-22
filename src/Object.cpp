@@ -18,8 +18,8 @@ Object::Object(string file)
     int counter = 0;
     int flag3, flag4 = 0;
 
-    ifstream archivoOBJ(file);
-    while (getline(archivoOBJ, line))
+    ifstream archivoPLY(file);
+    while (getline(archivoPLY, line))
     {
         counter++;        
         vector<string> elems = split(line, " ");
@@ -33,12 +33,16 @@ Object::Object(string file)
                 unsigned int i1 = stoi(split(elems[1], " ")[0]);
                 unsigned int i2 = stoi(split(elems[2], " ")[0]);
                 unsigned int i3 = stoi(split(elems[3], " ")[0]);
+                vector<unsigned long> vertex_index = {stoul(elems[1]), stoul(elems[2]), stoul(elems[3])};
                 
                 //Construir Face
                 Face f({i1, i2, i3});
+                f.calculatePlaneEcuation(vertices[vertex_index[0]],
+                                   vertices[vertex_index[1]],
+                                   vertices[vertex_index[2]]);
                 faces.push_back(f);
             }
-
+            /*Uncomment if 3d model are not using triangles
             if(elems[0].compare("4") == 0)
             {
                 counter=0;
@@ -52,6 +56,7 @@ Object::Object(string file)
                 Face f({i1, i2, i3, i4});
                 faces.push_back(f);
             }
+            */
 
             if(counter >= 11)
             {
@@ -87,6 +92,7 @@ vector<string> Object::split(const string& str, const string& delim)
 
 void Object::print()
 {
+    /*
     cout << "ply" << endl;
     cout << "format ascii 1.0" << endl;
     cout << "comment Created by Blender - www.blender.org" << endl;
@@ -102,6 +108,12 @@ void Object::print()
         v.print();
     for(Face f: this->faces)
         f.print();
+    */
+    int counter = 1;
+    for(int i=0; i<faces.size(); i++){
+        cout << "Cara #" << counter++ << endl;
+        faces.at(i).print();
+    }
     
 }
 

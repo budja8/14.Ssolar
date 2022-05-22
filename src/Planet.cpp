@@ -2,7 +2,7 @@
 #include <GL/glu.h>
 
 
-Planet::Planet(string file, float rotation, float speed, float distance, float size, float r, float g, float b, arma::Mat<double> sun_transf) : Object(file)
+Planet::Planet(string file, float rotation, float speed, float distance, float size, float r, float g, float b, arma::Mat<double> sun_transf, float ka, float kd) : Object(file)
 {
     this->rotation = rotation;
     this->speed = speed;
@@ -11,10 +11,12 @@ Planet::Planet(string file, float rotation, float speed, float distance, float s
     this->r = r;    
     this->g = g;
     this->b = b;
+    this->ka = ka;
+    this->kd = kd;
     this->sun_transf = sun_transf;    
 }
 
-void Planet::draw(){
+void Planet::draw(float Ia, float Ip, arma::frowvec3 F){
     // Dibujar Planeta
     this->rotation = (this->rotation < 360.0f) ? this->rotation + this->speed : 0.0f;
     arma::Mat<double> p_transf = sun_transf * Tr.Ry(this->rotation) * Tr.T(this->distance, 0.0, 0.0) * Tr.S(this->size, this->size, this->size);
@@ -22,10 +24,23 @@ void Planet::draw(){
     vector<Face> planeta_faces = getFaces();
     vector<Vertex> planeta_vertices = getVertex();
 
-    glColor3f(this->r, this->g, this->b);
     glBegin(GL_TRIANGLES);
     for (Face f : planeta_faces)
     {
+        arma::frowvec3 N = f.getNormal();
+        arma::frowvec3 V = {planeta_vertices[f.getIndVertex()[0]].getX(),
+                            planeta_vertices[f.getIndVertex()[0]].getY(),
+                            planeta_vertices[f.getIndVertex()[0]].getZ()};
+        arma::frowvec3 L = F - V;
+        L = arma::normalise(L);
+        float costheta = arma::dot(N, L);
+        float I = (Ia * this->ka) + (Ip * this->kd * costheta);
+
+        float rl = this->r * I;
+        float gl = this->g * I;
+        float bl = this->b * I;
+
+        glColor3f(rl, gl, bl);
         // Recorrer los vértices de la cara
         for (long v_ind : f.getIndVertex())
         {
@@ -38,7 +53,7 @@ void Planet::draw(){
     // Fin dibujado de Planeta
 }
 
-void Planet::draw(arma::Mat<double> transf){
+void Planet::draw(arma::Mat<double> transf, float Ia, float Ip, arma::frowvec3 F){
     // Dibujar Planeta
     this->rotation = (this->rotation < 360.0f) ? this->rotation + this->speed : 0.0f;
     arma::Mat<double> p_transf = transf * Tr.Ry(this->rotation) * Tr.T(this->distance, 0.0, 0.0) * Tr.S(this->size, this->size, this->size);
@@ -46,10 +61,24 @@ void Planet::draw(arma::Mat<double> transf){
     vector<Face> planeta_faces = getFaces();
     vector<Vertex> planeta_vertices = getVertex();
 
-    glColor3f(this->r, this->g, this->b);
+    //glColor3f(this->r, this->g, this->b);
     glBegin(GL_TRIANGLES);
     for (Face f : planeta_faces)
     {
+        arma::frowvec3 N = f.getNormal();
+        arma::frowvec3 V = {planeta_vertices[f.getIndVertex()[0]].getX(),
+                            planeta_vertices[f.getIndVertex()[0]].getY(),
+                            planeta_vertices[f.getIndVertex()[0]].getZ()};
+        arma::frowvec3 L = F - V;
+        L = arma::normalise(L);
+        float costheta = arma::dot(N, L);
+        float I = (Ia * this->ka) + (Ip * this->kd * costheta);
+
+        float rl = this->r * I;
+        float gl = this->g * I;
+        float bl = this->b * I;
+        
+        glColor3f(rl, gl, bl);
         // Recorrer los vértices de la cara
         for (long v_ind : f.getIndVertex())
         {
